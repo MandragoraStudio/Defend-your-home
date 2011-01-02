@@ -1,5 +1,6 @@
 *.csproj
 *.user
+*.cachefile
 Game.ico
 GameThumbnail.png
 obj

@@ -1,3 +1,4 @@
+#region Using Statements
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,22 +9,32 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Defend_your_home.Screens;
+#endregion
 
 namespace Defend_your_home
 {
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class BaseGame : Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-
-        public Game1()
+        public BaseGame()
         {
-            graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Content";
+            GameGlobals.graphicsManager = new GraphicsDeviceManager(this);
+            GameGlobals.graphicsManager.PreferredBackBufferWidth = GameGlobals.Width;
+            GameGlobals.graphicsManager.PreferredBackBufferHeight = GameGlobals.Height;
+            GameGlobals.content = new ContentManager(Services);
+            GameGlobals.content.RootDirectory = "Content";
 
+
+
+#if WINDOWS_PHONE
+            GameGlobals.graphicsManager.IsFullScreen = true;
+#endif
+
+            // Frame rate is 30 fps by default for Windows Phone.
+            TargetElapsedTime = TimeSpan.FromTicks(333333);
         }
 
         /// <summary>
@@ -34,9 +45,16 @@ namespace Defend_your_home
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+
+            //To test
+            this.IsMouseVisible = true;
+
+            //Assigned device
+            GameGlobals.device = GameGlobals.graphicsManager.GraphicsDevice;
+
+            //Start with LoadingScreen
+            ScreenManager.AddScreen("Loading", new LoadingScreen());
         }
 
         /// <summary>
@@ -45,10 +63,7 @@ namespace Defend_your_home
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            // TODO: use this.Content to load your game content here
+            GameGlobals.defaultFont = GameGlobals.content.Load<SpriteFont>("GameFont");
         }
 
         /// <summary>
@@ -57,7 +72,7 @@ namespace Defend_your_home
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+
         }
 
         /// <summary>
@@ -67,11 +82,12 @@ namespace Defend_your_home
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            GameGlobals.gameTime = gameTime;
 
-            // TODO: Add your update logic here
+            if (GameGlobals.isExiting)
+                Exit();
+
+            ScreenManager.CurrentScreen.Update();
 
             base.Update(gameTime);
         }
@@ -82,9 +98,10 @@ namespace Defend_your_home
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GameGlobals.device.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            ScreenManager.CurrentScreen.Draw();
+
 
             base.Draw(gameTime);
         }
