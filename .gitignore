@@ -1,0 +1,7 @@
+*.csproj
+*.user
+Game.ico
+GameThumbnail.png
+obj
+bin
+Properties
